@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">Banter</string>
-    <string name="title_section1">Soccer</string>
+    <string name="title_section1">Hockey</string>
     <string name="title_section2">Football</string>
     <string name="title_section3">Basketball</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
