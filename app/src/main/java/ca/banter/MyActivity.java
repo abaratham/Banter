@@ -48,6 +48,7 @@ public class MyActivity extends Activity
     }
 
     @Override
+    //hello kugilfgliygilygyilg
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getFragmentManager();
