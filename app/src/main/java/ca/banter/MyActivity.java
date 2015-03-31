@@ -6,6 +6,8 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -18,9 +20,30 @@ import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+
+import java.io.IOException;
+import java.net.URL;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 
 public class MyActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks, HockeyGamesFragment.OnFragmentInteractionListener {
+
+    public static final String EXTRA_GAME = "ca.banter.GAME";
+    public static final String EXTRA_USERNAME = "ca.banter.USERNAME";
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -51,12 +74,17 @@ public class MyActivity extends Activity
     //hello kugilfgliygilygyilg
     public void onNavigationDrawerItemSelected(int position) {
         switch (position) {
+            case 0:
+                new ReadGameInfoTask().execute("hockey");
+                getActionBar().setTitle("Hockey");
+                break;
             case 1:
-                Fragment fragment = new HockeyGamesFragment();
-                FragmentManager fragmentManager = getFragmentManager();
-                fragmentManager.beginTransaction()
-                        .replace(R.id.container, fragment)
-                        .commit();
+                new ReadGameInfoTask().execute("baseball");
+                getActionBar().setTitle("Baseball");
+                break;
+            case 2:
+                new ReadGameInfoTask().execute("basketball");
+                getActionBar().setTitle("Basketball");
                 break;
         }
     }
@@ -65,13 +93,17 @@ public class MyActivity extends Activity
     public void onSectionAttached(int number) {
         switch (number) {
             case 1:
-                mTitle = getString(R.string.title_section1);
+                mTitle = "Hockey";
+                //                getActionBar().setTitle(t);
                 break;
             case 2:
-                mTitle = getString(R.string.title_section2);
+                mTitle = "Baseball";
+//                getActionBar().setTitle(mTitle);
+//                new ReadGameInfoTask().execute();
                 break;
             case 3:
-                mTitle = getString(R.string.title_section3);
+                mTitle = "Basketball";
+//                getActionBar().setTitle(mTitle);
                 break;
         }
     }
@@ -80,7 +112,7 @@ public class MyActivity extends Activity
         ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+//        actionBar.setTitle(mTitle);
     }
 
 
@@ -110,8 +142,11 @@ public class MyActivity extends Activity
     }
 
     @Override
-    public void onFragmentInteraction(String id) {
-        
+    public void onFragmentInteraction(int pos) {
+        Intent i = new Intent(this, EventActivity.class);
+        i.putExtra(EXTRA_GAME, GameContent.ITEMS.get(pos).generateID());
+        i.putExtra(EXTRA_USERNAME, getIntent().getExtras().getString(LoginActivity.EXTRA));
+        startActivity(i);
     }
 
     /**
@@ -151,6 +186,116 @@ public class MyActivity extends Activity
             super.onAttach(activity);
             ((MyActivity) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
+        }
+    }
+
+    private class ReadGameInfoTask extends AsyncTask<String, Void, Void> {
+
+        private String hockeyURL = "http://sports.yahoo.com/nhl/scoreboard/?date=";
+        private String basketballURL = "http://sports.yahoo.com/nba/scoreboard/?date=";
+        private String baseballURL = "http://sports.yahoo.com/mlb/scoreboard/?date=";
+
+        @Override
+        protected void onPreExecute() {
+            Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH) + 1;
+            String m = "" + month;
+            if (month < 10) {
+                m = "0"+m;
+            }
+            int day = c.get(Calendar.DAY_OF_MONTH);
+            String d = "" + day;
+            if (day < 10) {
+                d = "0"+d;
+            }
+            hockeyURL += "" + year + "-" + m + "-" + d;
+            basketballURL += "" + year + "-" + m + "-" + d;
+            baseballURL += "" + year + "-" + m + "-" + d;
+        }
+
+        @Override
+        protected Void doInBackground(String... s){
+            ArrayList<Game> games = new ArrayList<Game>();
+            GameContent.ITEMS = new ArrayList<Game>();
+            Document doc = new Document("");
+            String url = "";
+            if (s[0].equals("hockey")) {
+                url = hockeyURL;
+            }
+            else if (s[0].equals("basketball")) {
+                url = basketballURL;
+            }
+            else if (s[0].equals("baseball")) {
+                url = baseballURL;
+            }
+            try {
+                System.out.println(url);
+                doc = Jsoup.connect(url)
+                        .userAgent("Mozilla/5.0 (Macintosh; U; Intel Mac OS X; de-de) AppleWebKit/523.10.3 (KHTML, like Gecko) Version/3.0.4 Safari/523.10").get();
+
+                Elements liveSummaries = doc.getElementsByAttributeValue("class", "game live link");
+                for (Element elem : liveSummaries) {
+                    String time = elem.getElementsByAttributeValue("class", "time")
+                            .text();
+                    Elements teams = elem.getElementsByTag("em");
+                    ArrayList<String> teamNames = new ArrayList<String>();
+                    for (Element team : teams) {
+                        teamNames.add(team.text());
+                    }
+
+                    assert teamNames.size() == 2;
+
+                    Game g = new Game(teamNames.get(0), teamNames.get(1), time);
+                    games.add(g);
+                    GameContent.addItem(g);
+                }
+
+
+                String searchKey = "[class*=game pre link]";
+                if (s[0].equals("baseball"))
+                    searchKey = "[class*=game link]";
+                Elements summaries = doc.select(searchKey);
+                Elements dates = doc.select("[class*=time]");
+                Calendar c = Calendar.getInstance();
+                String today = " " + c.get(Calendar.DAY_OF_WEEK) + " "
+                        + c.get(Calendar.DAY_OF_MONTH) + " "
+                        + (c.get(Calendar.MONTH) + 1) + " " + c.get(Calendar.YEAR);
+
+                for (Element elem : summaries) {
+                    String time = elem.getElementsByAttributeValue("class", "time")
+                            .text() + today;
+                    Elements teams = elem.getElementsByTag("em");
+                    ArrayList<String> teamNames = new ArrayList<String>();
+                    for (Element team : teams) {
+                        teamNames.add(team.text());
+                    }
+                    DateFormat format = new SimpleDateFormat("hh:m a z F d M y",
+                            Locale.ENGLISH);
+                    Date date = null;
+                    try {
+                        date = format.parse(time);
+                    }catch (ParseException e){}
+
+                    assert teamNames.size() == 2;
+
+                    Game g = new Game(teamNames.get(0), teamNames.get(1), date);
+                    games.add(g);
+                    GameContent.addItem(g);
+            }
+            } catch (IOException exception) {
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            System.out.println(GameContent.ITEMS);
+            Fragment fragment = new HockeyGamesFragment();
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .commit();
         }
     }
 
