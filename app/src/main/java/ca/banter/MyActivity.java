@@ -5,31 +5,23 @@ import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
+import android.widget.ProgressBar;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-
 import java.io.IOException;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -40,7 +32,7 @@ import java.util.Locale;
 
 
 public class MyActivity extends Activity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, HockeyGamesFragment.OnFragmentInteractionListener {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, GamesFragment.OnFragmentInteractionListener {
 
     public static final String EXTRA_GAME = "ca.banter.GAME";
     public static final String EXTRA_USERNAME = "ca.banter.USERNAME";
@@ -75,15 +67,15 @@ public class MyActivity extends Activity
     public void onNavigationDrawerItemSelected(int position) {
         switch (position) {
             case 0:
-                new ReadGameInfoTask().execute("hockey");
+                new ReadGameInfoTask(this).execute("hockey");
                 getActionBar().setTitle("Hockey");
                 break;
             case 1:
-                new ReadGameInfoTask().execute("baseball");
+                new ReadGameInfoTask(this).execute("baseball");
                 getActionBar().setTitle("Baseball");
                 break;
             case 2:
-                new ReadGameInfoTask().execute("basketball");
+                new ReadGameInfoTask(this).execute("basketball");
                 getActionBar().setTitle("Basketball");
                 break;
         }
@@ -189,11 +181,17 @@ public class MyActivity extends Activity
         }
     }
 
-    private class ReadGameInfoTask extends AsyncTask<String, Void, Void> {
+    private class ReadGameInfoTask extends AsyncTask<String, Integer, Void> {
 
         private String hockeyURL = "http://sports.yahoo.com/nhl/scoreboard/?date=";
         private String basketballURL = "http://sports.yahoo.com/nba/scoreboard/?date=";
         private String baseballURL = "http://sports.yahoo.com/mlb/scoreboard/?date=";
+        Activity activity;
+
+        public ReadGameInfoTask(Activity a) {
+            super();
+            activity = a;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -212,6 +210,12 @@ public class MyActivity extends Activity
             hockeyURL += "" + year + "-" + m + "-" + d;
             basketballURL += "" + year + "-" + m + "-" + d;
             baseballURL += "" + year + "-" + m + "-" + d;
+
+            Fragment fragment = new LoadingFragment();
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, fragment)
+                    .commit();
         }
 
         @Override
@@ -233,7 +237,7 @@ public class MyActivity extends Activity
                 System.out.println(url);
                 doc = Jsoup.connect(url)
                         .userAgent("Mozilla/5.0 (Macintosh; U; Intel Mac OS X; de-de) AppleWebKit/523.10.3 (KHTML, like Gecko) Version/3.0.4 Safari/523.10").get();
-
+                publishProgress(5);
                 Elements liveSummaries = doc.getElementsByAttributeValue("class", "game live link");
                 for (Element elem : liveSummaries) {
                     String time = elem.getElementsByAttributeValue("class", "time")
@@ -249,7 +253,10 @@ public class MyActivity extends Activity
                     Game g = new Game(teamNames.get(0), teamNames.get(1), time);
                     games.add(g);
                     GameContent.addItem(g);
+
+
                 }
+                publishProgress(50);
 
 
                 String searchKey = "[class*=game pre link]";
@@ -285,13 +292,19 @@ public class MyActivity extends Activity
             }
             } catch (IOException exception) {
             }
+            publishProgress(100);
             return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... progress) {
+            ((ProgressBar)activity.findViewById(R.id.progressBar)).setProgress(progress[0]);
         }
 
         @Override
         protected void onPostExecute(Void result) {
             System.out.println(GameContent.ITEMS);
-            Fragment fragment = new HockeyGamesFragment();
+            Fragment fragment = new GamesFragment();
             FragmentManager fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.container, fragment)

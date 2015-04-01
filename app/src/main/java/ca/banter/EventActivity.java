@@ -6,11 +6,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.parse.Parse;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+
+import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 import com.parse.FindCallback;
@@ -21,13 +24,13 @@ public class EventActivity extends Activity {
 
     private int game;
     private String username;
+    MessageAdapter adapter;
+    ListView lv;
     Timer t;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        Parse.enableLocalDatastore(this);
-        Parse.initialize(this, "pl3PoMR9Z770PuFeZhB9tq5lBbpU0TZP6KnuvYMB", "R6zcgh2l6otaSmQfQceMo3ISxxs5TV1WqnOchfs4");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event);
         game = getIntent().getExtras().getInt(MyActivity.EXTRA_GAME);
@@ -39,7 +42,10 @@ public class EventActivity extends Activity {
             public void run() {
                 updateMessages();
             }
-        }, 0, 1500);
+        }, 0, 500);
+        adapter = new MessageAdapter(this, new Stack<Message>());
+        lv = (ListView)findViewById(R.id.messageList);
+        lv.setAdapter(adapter);
     }
 
     public void updateMessages() {
@@ -53,12 +59,16 @@ public class EventActivity extends Activity {
                 } else {
                     Log.d("score", "Error: " + e.getMessage());
                 }
-                TextView chat = ((TextView) findViewById(R.id.chat_box));
-                String s = "";
+                int size = adapter.getCount();
+                adapter.clear();
                 for (ParseObject message : messages) {
-                    s += message.get("username") + ": " + message.get("comment") + "\n";
+                    adapter.addItem(new Message(message.get("comment").toString(), message.get("username").toString()));
+                    adapter.notifyDataSetChanged();
                 }
-                chat.setText(s);
+                //user just sent a message
+                if (adapter.getCount() != size)
+                    lv.setSelection(adapter.getCount());
+
             }
         });
 
@@ -77,7 +87,6 @@ public class EventActivity extends Activity {
         System.out.println(game + "3");
         message.saveInBackground();
         updateMessages();
-
     }
 
 
@@ -101,5 +110,21 @@ public class EventActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onPause() {
+        t.cancel();
+    }
+
+    @Override
+    public void onResume() {
+        t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                updateMessages();
+            }
+        }, 0, 500);
     }
 }

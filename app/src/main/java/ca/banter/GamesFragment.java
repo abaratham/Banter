@@ -9,13 +9,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
-import java.util.ArrayList;
-
-
-import ca.banter.dummy.DummyContent;
 
 /**
  * A fragment representing a list of Items.
@@ -26,16 +20,7 @@ import ca.banter.dummy.DummyContent;
  * Activities containing this fragment MUST implement the {@link OnFragmentInteractionListener}
  * interface.
  */
-public class HockeyGamesFragment extends Fragment implements AbsListView.OnItemClickListener {
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+public class GamesFragment extends Fragment implements AbsListView.OnItemClickListener {
 
     private OnFragmentInteractionListener mListener;
 
@@ -51,11 +36,9 @@ public class HockeyGamesFragment extends Fragment implements AbsListView.OnItemC
     private ArrayAdapter<Game> mAdapter;
 
     // TODO: Rename and change types of parameters
-    public static HockeyGamesFragment newInstance(String param1, String param2) {
-        HockeyGamesFragment fragment = new HockeyGamesFragment();
+    public static GamesFragment newInstance() {
+        GamesFragment fragment = new GamesFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -64,16 +47,12 @@ public class HockeyGamesFragment extends Fragment implements AbsListView.OnItemC
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public HockeyGamesFragment() {
+    public GamesFragment() {
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
         mAdapter = new ArrayAdapter<Game>(getActivity(),
                 android.R.layout.simple_list_item_1,android.R.id.text1, GameContent.ITEMS);
         System.out.println("ONCREATE");
