@@ -239,6 +239,14 @@ public class MyActivity extends Activity
                         .userAgent("Mozilla/5.0 (Macintosh; U; Intel Mac OS X; de-de) AppleWebKit/523.10.3 (KHTML, like Gecko) Version/3.0.4 Safari/523.10").get();
                 publishProgress(5);
                 Elements liveSummaries = doc.getElementsByAttributeValue("class", "game live link");
+                String searchKey = "[class*=game pre link]";
+                if (s[0].equals("baseball"))
+                    searchKey = "[class*=game link]";
+                Elements summaries = doc.select(searchKey);
+
+                int totalSize = summaries.size() + liveSummaries.size(), processed = 5;
+                System.out.println("Total size: " + totalSize);
+
                 for (Element elem : liveSummaries) {
                     String time = elem.getElementsByAttributeValue("class", "time")
                             .text();
@@ -254,15 +262,12 @@ public class MyActivity extends Activity
                     games.add(g);
                     GameContent.addItem(g);
 
+                    int added = (int)((1.0/(double)totalSize) * 100);
+                    processed += added;
+                    publishProgress(processed);
 
                 }
-                publishProgress(50);
 
-
-                String searchKey = "[class*=game pre link]";
-                if (s[0].equals("baseball"))
-                    searchKey = "[class*=game link]";
-                Elements summaries = doc.select(searchKey);
                 Elements dates = doc.select("[class*=time]");
                 Calendar c = Calendar.getInstance();
                 String today = " " + c.get(Calendar.DAY_OF_WEEK) + " "
@@ -289,7 +294,12 @@ public class MyActivity extends Activity
                     Game g = new Game(teamNames.get(0), teamNames.get(1), date);
                     games.add(g);
                     GameContent.addItem(g);
-            }
+
+                    int added = (int)((1.0/(double)totalSize) * 100);
+                    processed += added;
+                    publishProgress(processed);
+
+                }
             } catch (IOException exception) {
             }
             publishProgress(100);

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -41,6 +42,12 @@ public class EventActivity extends Activity {
             @Override
             public void run() {
                 updateMessages();
+                Button button = ((Button)findViewById(R.id.send_button));
+                TextView tv = (TextView)findViewById(R.id.input_box);
+                if (tv.getText().toString().length() <= 0)
+                    button.setActivated(false);
+                if (tv.getText().toString().length() > 0)
+                    button.setActivated(true);
             }
         }, 0, 500);
         adapter = new MessageAdapter(this, new Stack<Message>());
@@ -54,11 +61,6 @@ public class EventActivity extends Activity {
         System.out.println(game + "2");
         query.findInBackground(new FindCallback<ParseObject>() {
             public void done(List<ParseObject> messages, ParseException e) {
-                if (e == null) {
-                    Log.d("score", "Retrieved " + messages.size() + " scores");
-                } else {
-                    Log.d("score", "Error: " + e.getMessage());
-                }
                 int size = adapter.getCount();
                 adapter.clear();
                 for (ParseObject message : messages) {
@@ -114,11 +116,33 @@ public class EventActivity extends Activity {
 
     @Override
     public void onPause() {
+        super.onPause();
         t.cancel();
+        t.purge();
     }
 
     @Override
     public void onResume() {
+        super.onResume();
+        t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                updateMessages();
+            }
+        }, 0, 500);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        t.cancel();
+        t.purge();
+    }
+
+    @Override
+    public void onRestart() {
+        super.onRestart();
         t = new Timer();
         t.schedule(new TimerTask() {
             @Override
