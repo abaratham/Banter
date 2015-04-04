@@ -10,7 +10,7 @@ public class Game {
     public static int EVENT_KEY = 0;
     private String homeTeam, awayTeam;
     private Date date;
-    private boolean inProgress;
+    public boolean inProgress;
     private String timeLeft;
     private int id;
 
@@ -62,5 +62,9 @@ public class Game {
 
     public Date getDate() {
         return date;
+    }
+
+    public String getTimeLeft() {
+        return timeLeft;
     }
 }

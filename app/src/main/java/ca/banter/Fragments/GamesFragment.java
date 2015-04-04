@@ -1,4 +1,4 @@
-package ca.banter;
+package ca.banter.Fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -10,6 +10,11 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
+import ca.banter.Game;
+import ca.banter.GameAdapter;
+import ca.banter.GameContent;
+import ca.banter.R;
 
 /**
  * A fragment representing a list of Items.
@@ -33,7 +38,7 @@ public class GamesFragment extends Fragment implements AbsListView.OnItemClickLi
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private ArrayAdapter<Game> mAdapter;
+    private GameAdapter mAdapter;
 
     // TODO: Rename and change types of parameters
     public static GamesFragment newInstance() {
@@ -53,8 +58,7 @@ public class GamesFragment extends Fragment implements AbsListView.OnItemClickLi
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAdapter = new ArrayAdapter<Game>(getActivity(),
-                android.R.layout.simple_list_item_1,android.R.id.text1, GameContent.ITEMS);
+        mAdapter = new GameAdapter(getActivity(), GameContent.ITEMS);
         System.out.println("ONCREATE");
     }
 

@@ -3,25 +3,26 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="ca.banter" >
 
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:name="ca.banter.Application"
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/banter_icon"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/CustomActionBarTheme" >
         <activity
-            android:name=".MyActivity"
+            android:name=".Activities.MyActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".EventActivity"
+            android:name=".Activities.EventActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name=".Activities.LoginActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

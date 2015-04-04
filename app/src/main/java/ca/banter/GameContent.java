@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class GameContent {
 
-    public static List<Game> ITEMS = new ArrayList<Game>();
+    public static ArrayList<Game> ITEMS = new ArrayList<Game>();
 
     public static void addItem(Game game) {
         ITEMS.add(game);

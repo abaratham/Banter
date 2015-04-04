@@ -1,4 +1,4 @@
-package ca.banter;
+package ca.banter.Activities;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -10,7 +10,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.parse.Parse;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
@@ -19,8 +18,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 import com.parse.FindCallback;
 import java.util.List;
-import android.util.Log;
+
 import com.parse.ParseException;
+
+import ca.banter.Message;
+import ca.banter.MessageAdapter;
+import ca.banter.R;
+
 public class EventActivity extends Activity {
 
     private int game;
@@ -44,10 +48,6 @@ public class EventActivity extends Activity {
                 updateMessages();
                 Button button = ((Button)findViewById(R.id.send_button));
                 TextView tv = (TextView)findViewById(R.id.input_box);
-                if (tv.getText().toString().length() <= 0)
-                    button.setActivated(false);
-                if (tv.getText().toString().length() > 0)
-                    button.setActivated(true);
             }
         }, 0, 500);
         adapter = new MessageAdapter(this, new Stack<Message>());

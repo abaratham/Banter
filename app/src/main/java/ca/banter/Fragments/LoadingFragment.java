@@ -1,4 +1,4 @@
-package ca.banter;
+package ca.banter.Fragments;
 
 import android.app.Activity;
 import android.net.Uri;
@@ -7,7 +7,8 @@ import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
+
+import ca.banter.R;
 
 
 /**

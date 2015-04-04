@@ -1,4 +1,4 @@
-package ca.banter;
+package ca.banter.Activities;
 
 import android.app.Activity;
 
@@ -29,6 +29,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
+import ca.banter.Game;
+import ca.banter.GameContent;
+import ca.banter.Fragments.GamesFragment;
+import ca.banter.Fragments.LoadingFragment;
+import ca.banter.Fragments.NavigationDrawerFragment;
+import ca.banter.R;
 
 
 public class MyActivity extends Activity
